@@ -27,9 +27,8 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ('author.username', 'name', 'tags.name', 'cooking_time',)
     save_on_top = True
 
-    @staticmethod
-    @admin.display(description='Число рецептов в Избранном')
-    def get_favorites_recipe_count(obj):
+    @admin.display(description='Число добавлений данного рецепта в Избранное')
+    def get_favorites_recipe_count(self, obj):
         return obj.in_favorites.count()
 
 

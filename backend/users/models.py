@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import EmailValidator
 from django.db import models
 
+from foodgram.settings import MAX_LENGTH_EMAIL, MAX_LENGTH_TEXT_USERS
 from users.validators import validate_username
 
 ADMIN = 'admin'
@@ -14,24 +15,24 @@ class CustomUser(AbstractUser):
         (USER, 'Пользователь'),
     ]
     username = models.CharField(
-        max_length=150,
+        max_length=MAX_LENGTH_TEXT_USERS,
         unique=True,
         validators=[validate_username, ],
         verbose_name='Логин пользователя',
         help_text='Введите свой логин',
     )
     first_name = models.CharField(
-        max_length=150,
+        max_length=MAX_LENGTH_TEXT_USERS,
         verbose_name='Имя пользователя',
         help_text='Введите имя',
     )
     last_name = models.CharField(
-        max_length=150,
+        max_length=MAX_LENGTH_TEXT_USERS,
         verbose_name='Фамилия пользователя',
         help_text='Введите фамилию',
     )
     email = models.EmailField(
-        max_length=254,
+        max_length=MAX_LENGTH_EMAIL,
         validators=[EmailValidator],
         verbose_name='Электронная почта пользователя',
         help_text='Введите свою электронную почту',

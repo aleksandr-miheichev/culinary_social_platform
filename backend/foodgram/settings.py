@@ -131,8 +131,18 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        'user_create': 'users.serializers.CustomCreateUserSerializers',
+        'user_create': 'users.serializers.CustomUserRegistrationSerializer',
         'user': 'users.serializers.CustomUserSerializers',
         'current_user': 'users.serializers.CustomUserSerializers',
     },
 }
+
+MAX_LENGTH_PASSWORD = 150
+
+MAX_LENGTH_TEXT_USERS = 150
+
+MAX_LENGTH_TEXT_RECIPES = 200
+
+MAX_LENGTH_EMAIL = 254
+
+MAX_LENGTH_COLOR = 7

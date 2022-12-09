@@ -2,18 +2,19 @@ from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from foodgram.settings import MAX_LENGTH_COLOR, MAX_LENGTH_TEXT_RECIPES
 from recipes.validators import validate_slug
 from users.models import CustomUser
 
 
 class Ingredient(models.Model):
     name = models.CharField(
-        max_length=200,
+        max_length=MAX_LENGTH_TEXT_RECIPES,
         verbose_name='Наименование',
         help_text='Введите наименование для ингредиента',
     )
     measurement_unit = models.CharField(
-        max_length=200,
+        max_length=MAX_LENGTH_TEXT_RECIPES,
         null=False,
         blank=False,
         verbose_name='Единица измерения',
@@ -34,20 +35,20 @@ class Ingredient(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(
-        max_length=200,
+        max_length=MAX_LENGTH_TEXT_RECIPES,
         unique=True,
         verbose_name='Название',
         help_text='Введите название тега',
     )
     color = ColorField(
-        max_length=7,
+        max_length=MAX_LENGTH_COLOR,
         default='#FF0000',
         unique=True,
         verbose_name='Цвет в формате hex',
         help_text='Введите цвет в формате hex для тега',
     )
     slug = models.SlugField(
-        max_length=200,
+        max_length=MAX_LENGTH_TEXT_RECIPES,
         unique=True,
         validators=[validate_slug, ],
         verbose_name='Идентификатор',
@@ -83,7 +84,7 @@ class Recipe(models.Model):
         help_text='Выберите ингредиент для рецепта'
     )
     name = models.CharField(
-        max_length=200,
+        max_length=MAX_LENGTH_TEXT_RECIPES,
         verbose_name='Название',
         help_text='Введите название рецепта',
     )
@@ -203,7 +204,7 @@ class FavoritesRecipe(models.Model):
 
 
 class ShoppingList(models.Model):
-    """Модель для добавления Рецепта в список покупок."""
+    """Модель для добавления Рецепта в Список покупок."""
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,

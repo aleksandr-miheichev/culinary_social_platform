@@ -1,7 +1,6 @@
 from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db import models
-
 from foodgram.settings import MAX_LENGTH_COLOR, MAX_LENGTH_TEXT_RECIPES
 from recipes.validators import validate_slug
 from users.models import CustomUser

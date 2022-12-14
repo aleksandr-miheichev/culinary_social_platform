@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import EmailValidator
-from django.db import models
+from django.db.models import CharField, EmailField, UniqueConstraint
+
 from foodgram.settings import MAX_LENGTH_EMAIL, MAX_LENGTH_TEXT_USERS
 from users.validators import validate_username
 
@@ -13,30 +14,30 @@ class CustomUser(AbstractUser):
         (ADMIN, 'Администратор'),
         (USER, 'Пользователь'),
     ]
-    username = models.CharField(
+    username = CharField(
         max_length=MAX_LENGTH_TEXT_USERS,
         unique=True,
         validators=[validate_username, ],
         verbose_name='Логин пользователя',
         help_text='Введите свой логин',
     )
-    first_name = models.CharField(
+    first_name = CharField(
         max_length=MAX_LENGTH_TEXT_USERS,
         verbose_name='Имя пользователя',
         help_text='Введите имя',
     )
-    last_name = models.CharField(
+    last_name = CharField(
         max_length=MAX_LENGTH_TEXT_USERS,
         verbose_name='Фамилия пользователя',
         help_text='Введите фамилию',
     )
-    email = models.EmailField(
+    email = EmailField(
         max_length=MAX_LENGTH_EMAIL,
         validators=[EmailValidator],
         verbose_name='Электронная почта пользователя',
         help_text='Введите свою электронную почту',
     )
-    role = models.CharField(
+    role = CharField(
         max_length=max(len(role) for role, _ in ROLE_CHOICES),
         choices=ROLE_CHOICES,
         default=USER,
@@ -48,7 +49,7 @@ class CustomUser(AbstractUser):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
+            UniqueConstraint(
                 name='unique_email_user',
                 fields=['email', 'username', ],
             ),

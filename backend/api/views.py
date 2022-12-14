@@ -1,18 +1,20 @@
-from api.pagination import NumberAuthorsOnPagePagination
-from api.serializers import (IngredientSerializer, SubscriptionSerializer,
-                             TagSerializer)
 from django.shortcuts import get_object_or_404
-from recipes.models import Ingredient, Tag
-from rest_framework import mixins, permissions, viewsets
 from rest_framework.filters import SearchFilter
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
+from rest_framework.permissions import AllowAny
+from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet
+
+from api.pagination import NumberAuthorsOnPagePagination
+from api.serializers import (FavoritesRecipeSerializer, IngredientSerializer,
+                             SubscriptionSerializer, TagSerializer)
+from recipes.models import Ingredient, Recipe, Tag
 from users.models import CustomUser
 
 
 class CreateDestroyViewSet(
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
+    CreateModelMixin,
+    DestroyModelMixin,
+    GenericViewSet
 ):
     """Создать или удалить объект при POST, DELETE запросе."""
     pass
@@ -21,7 +23,7 @@ class CreateDestroyViewSet(
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (AllowAny,)
     filter_backends = (SearchFilter,)
     search_fields = ('^name',)
 
@@ -29,13 +31,12 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (AllowAny,)
 
 
 class FavoriteAuthorsListViewSet(ReadOnlyModelViewSet):
     """Вьюсет для отображения авторов рецептов, на которых подписан текущий
     пользователь."""
-    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = SubscriptionSerializer
     pagination_class = NumberAuthorsOnPagePagination
 
@@ -52,7 +53,6 @@ class FavoriteAuthorsListViewSet(ReadOnlyModelViewSet):
 class CreateDestroySubscriptionViewSet(CreateDestroyViewSet):
     """Вьюсет для подписки или отписки от автора."""
     serializer_class = SubscriptionSerializer
-    permission_classes = (permissions.IsAuthenticated,)
 
     def get_user(self):
         return get_object_or_404(CustomUser, id=self.kwargs['id'])
@@ -70,4 +70,27 @@ class CreateDestroySubscriptionViewSet(CreateDestroyViewSet):
         instance.delete(
             user=self.request.user,
             subscribed_author=self.get_user()
+        )
+
+
+class CreateDestroyFavoritesRecipeViewSet(CreateDestroyViewSet):
+    """Вьюсет для добавления или удаления рецепта из Избранного."""
+    serializer_class = FavoritesRecipeSerializer
+
+    def get_recipe(self):
+        return get_object_or_404(Recipe, id=self.kwargs['id'])
+
+    def get_queryset(self):
+        return self.get_recipe().in_favorites
+
+    def perform_create(self, serializer):
+        serializer.save(
+            user=self.request.user,
+            recipe=self.get_recipe()
+        )
+
+    def perform_destroy(self, instance):
+        instance.delete(
+            user=self.request.user,
+            recipe=self.get_recipe()
         )

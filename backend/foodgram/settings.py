@@ -136,6 +136,9 @@ DJOSER = {
         'user': 'users.serializers.CustomUserSerializers',
         'current_user': 'users.serializers.CustomUserSerializers',
     },
+    'PERMISSIONS': {
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    },
 }
 
 MAX_LENGTH_PASSWORD = 150

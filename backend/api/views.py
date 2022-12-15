@@ -1,12 +1,19 @@
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
 from rest_framework.permissions import AllowAny
-from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet
+from rest_framework.viewsets import (GenericViewSet, ModelViewSet,
+                                     ReadOnlyModelViewSet)
 
-from api.pagination import NumberAuthorsOnPagePagination
-from api.serializers import (FavoritesRecipeSerializer, IngredientSerializer,
-                             SubscriptionSerializer, TagSerializer)
+from api.filters import RecipeFilter
+from api.pagination import NumberRecordsPerPagePagination
+from api.permissions import IsAuthorOrAdmin
+from api.serializers import (FavoritesRecipeSerializer, GetRecipeSerializer,
+                             IngredientSerializer,
+                             PostPatchDeleteRecipeSerializer,
+                             ShoppingListSerializer, SubscriptionSerializer,
+                             TagSerializer)
 from recipes.models import Ingredient, Recipe, Tag
 from users.models import CustomUser
 
@@ -38,7 +45,7 @@ class FavoriteAuthorsListViewSet(ReadOnlyModelViewSet):
     """Вьюсет для отображения авторов рецептов, на которых подписан текущий
     пользователь."""
     serializer_class = SubscriptionSerializer
-    pagination_class = NumberAuthorsOnPagePagination
+    pagination_class = NumberRecordsPerPagePagination
 
     def get_user(self):
         return get_object_or_404(
@@ -94,3 +101,45 @@ class CreateDestroyFavoritesRecipeViewSet(CreateDestroyViewSet):
             user=self.request.user,
             recipe=self.get_recipe()
         )
+
+
+class CreateDestroyRecipeInShoppingListViewSet(CreateDestroyViewSet):
+    """Вьюсет для добавления или удаления рецепта из Списка покупок."""
+    serializer_class = ShoppingListSerializer
+
+    def get_recipe(self):
+        return get_object_or_404(Recipe, id=self.kwargs['id'])
+
+    def get_queryset(self):
+        return self.get_recipe().in_shopping_list
+
+    def perform_create(self, serializer):
+        serializer.save(
+            user=self.request.user,
+            recipe=self.get_recipe()
+        )
+
+    def perform_destroy(self, instance):
+        instance.delete(
+            user=self.request.user,
+            recipe=self.get_recipe()
+        )
+
+
+class RecipesViewSet(ModelViewSet):
+    queryset = Recipe.objects.all()
+    pagination_class = NumberRecordsPerPagePagination
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = RecipeFilter
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return GetRecipeSerializer
+        return PostPatchDeleteRecipeSerializer
+
+    def get_permissions(self):
+        if self.action == 'list':
+            return [AllowAny]
+        elif self.action == ('update', 'partial_update', 'destroy'):
+            return [IsAuthorOrAdmin]
+        return super().get_permissions()

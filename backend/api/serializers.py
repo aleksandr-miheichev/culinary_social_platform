@@ -207,8 +207,8 @@ class PostIngredientInRecipeSerializer(ModelSerializer):
         )
 
 
-class GetPatchRecipeSerializer(ModelSerializer):
-    """Сериализатор для получения/обновления рецепта(ов)."""
+class GetRecipeSerializer(ModelSerializer):
+    """Сериализатор для получения рецепта(ов)."""
     tags = TagSerializer(read_only=True, many=True)
     author = CustomUserSerializer(read_only=True)
     ingredients = GetPatchIngredientInRecipeSerializer(
@@ -246,8 +246,8 @@ class GetPatchRecipeSerializer(ModelSerializer):
         ).exists()
 
 
-class PostRecipeSerializer(ModelSerializer):
-    """Сериализатор для создания рецепта."""
+class PostPatchDeleteRecipeSerializer(ModelSerializer):
+    """Сериализатор для создания, обновления, удаления рецепта."""
 
     tags = PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),

@@ -1,7 +1,18 @@
 from django.contrib import admin
 
-from recipes.models import (FavoritesRecipe, Ingredient, Recipe, ShoppingList,
+from recipes.models import (FavoritesRecipe, Ingredient, Recipe,
+                            RecipeIngredient, RecipeTag, ShoppingList,
                             Subscription, Tag)
+
+
+class RecipeIngredientInLine(admin.TabularInline):
+    model = RecipeIngredient
+    extra = 1
+
+
+class RecipeTagInLine(admin.TabularInline):
+    model = RecipeTag
+    extra = 1
 
 
 @admin.register(Ingredient)
@@ -14,17 +25,18 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(FavoritesRecipe)
 class FavoritesRecipeAdmin(admin.ModelAdmin):
-    list_display = ('user.username', 'recipe.name',)
-    search_fields = ('user.username', 'recipe.name',)
-    list_filter = ('user.username', 'recipe.name',)
+    list_display = ('user', 'recipe',)
+    search_fields = ('user', 'recipe',)
+    list_filter = ('user', 'recipe',)
     save_on_top = True
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('author.username', 'name', 'tags.name', 'cooking_time',)
-    search_fields = ('author.username', 'name', 'cooking_time',)
-    list_filter = ('author.username', 'name', 'tags.name', 'cooking_time',)
+    list_display = ('author', 'name', 'cooking_time',)
+    search_fields = ('author', 'name', 'cooking_time',)
+    list_filter = ('author', 'name', 'tags', 'cooking_time',)
+    inlines = (RecipeIngredientInLine, RecipeTagInLine,)
     save_on_top = True
 
     @admin.display(description='Число добавлений данного рецепта в Избранное')
@@ -34,17 +46,17 @@ class RecipeAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingList)
 class ShoppingListAdmin(admin.ModelAdmin):
-    list_display = ('user.username', 'recipe.name',)
-    search_fields = ('user.username', 'recipe.name',)
-    list_filter = ('user.username', 'recipe.name',)
+    list_display = ('user', 'recipe',)
+    search_fields = ('user', 'recipe',)
+    list_filter = ('user', 'recipe',)
     save_on_top = True
 
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('user.username', 'subscribed_author.username',)
-    search_fields = ('user.username', 'subscribed_author.username',)
-    list_filter = ('user.username', 'subscribed_author.username',)
+    list_display = ('user', 'subscribed_author',)
+    search_fields = ('user', 'subscribed_author',)
+    list_filter = ('user', 'subscribed_author',)
     save_on_top = True
 
 

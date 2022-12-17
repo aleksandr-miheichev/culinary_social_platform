@@ -16,8 +16,6 @@ from users.models import CustomUser
 class CustomUserRegistrationSerializer(UserCreateSerializer):
     password = CharField(
         max_length=MAX_LENGTH_PASSWORD,
-        style={"input_type": "password"},
-        write_only=True
     )
 
     class Meta(UserCreateSerializer.Meta):

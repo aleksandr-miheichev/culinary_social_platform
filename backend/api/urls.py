@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
 
 from api.views import (CreateDestroyFavoritesRecipeViewSet,
@@ -14,27 +14,33 @@ router_v1.register('ingredients', IngredientViewSet, basename='ingredients')
 router_v1.register('recipes', RecipesViewSet, basename='recipes')
 
 recipes_urlpatterns = [
-    path(
+    re_path(
         r'(?P<pk>\d+)/favorite/',
-        CreateDestroyFavoritesRecipeViewSet.as_view(),
+        CreateDestroyFavoritesRecipeViewSet.as_view(
+            {'post': 'create', 'delete': 'destroy'}
+        ),
         name='favorite'
     ),
-    path(
+    re_path(
         r'(?P<pk>\d+)/shopping_cart/',
-        CreateDestroyRecipeInShoppingListViewSet.as_view(),
+        CreateDestroyRecipeInShoppingListViewSet.as_view(
+            {'post': 'create', 'delete': 'destroy'}
+        ),
         name='shopping_cart'
     ),
 ]
 
 users_urlpatterns = [
-    path(
+    re_path(
         r'(?P<pk>\d+)/subscribe/',
-        CreateDestroySubscriptionViewSet.as_view(),
+        CreateDestroySubscriptionViewSet.as_view(
+            {'post': 'create', 'delete': 'destroy'}
+        ),
         name='subscribe'
     ),
     path(
         'subscriptions/',
-        FavoriteAuthorsListViewSet.as_view(),
+        FavoriteAuthorsListViewSet.as_view({'get': 'list'}),
         name='subscription'
     ),
 ]

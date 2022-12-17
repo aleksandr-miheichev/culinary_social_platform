@@ -34,6 +34,7 @@ class CustomUser(AbstractUser):
     email = EmailField(
         max_length=MAX_LENGTH_EMAIL,
         validators=[EmailValidator],
+        unique=True,
         verbose_name='Электронная почта пользователя',
         help_text='Введите свою электронную почту',
     )
@@ -45,7 +46,7 @@ class CustomUser(AbstractUser):
         help_text='Выберите роль для пользователя',
     )
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['email', 'username', ]
+    REQUIRED_FIELDS = ['username', ]
 
     class Meta:
         constraints = [

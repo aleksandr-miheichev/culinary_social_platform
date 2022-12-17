@@ -2,7 +2,7 @@ from re import findall
 
 from django.core.exceptions import ValidationError
 
-ANTI_PATTERN = r'^[-a-zA-Z0-9_]+$'
+ANTI_PATTERN = r'[^-a-zA-Z0-9_]+$'
 
 
 def validate_slug(data):

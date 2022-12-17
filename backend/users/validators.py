@@ -2,7 +2,7 @@ from re import findall
 
 from django.core.exceptions import ValidationError
 
-ANTI_PATTERN = r'^[\w.@+-]+\z'
+ANTI_PATTERN = r'[^\w.@+-]'
 
 
 def validate_username(data):

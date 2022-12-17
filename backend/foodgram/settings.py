@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'colorfield',
-    'users'
+    'users',
     'recipes',
     'api',
 ]
@@ -126,15 +126,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'user.CustomUser'
+AUTH_USER_MODEL = 'users.CustomUser'
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        'user_create': 'users.serializers.CustomUserRegistrationSerializer',
-        'user': 'users.serializers.CustomUserSerializers',
-        'current_user': 'users.serializers.CustomUserSerializers',
+        'user_create': 'api.serializers.CustomUserRegistrationSerializer',
+        'user': 'api.serializers.CustomUserSerializer',
+        'current_user': 'api.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
         'user_list': ['rest_framework.permissions.AllowAny'],

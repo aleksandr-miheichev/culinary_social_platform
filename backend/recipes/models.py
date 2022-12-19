@@ -45,7 +45,7 @@ class Tag(Model):
         default='#FF0000',
         unique=True,
         verbose_name='Цвет в формате hex',
-        help_text='Введите цвет в формате hex для тега',
+        help_text='Выберите цвет для тега',
     )
     slug = SlugField(
         max_length=MAX_LENGTH_TEXT_RECIPES,
@@ -199,8 +199,8 @@ class FavoritesRecipe(Model):
             )
         ]
         ordering = ('-id',)
-        verbose_name = 'Рецепт блюда в списке Избранное'
-        verbose_name_plural = 'Рецепты блюд в списке Избранное'
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
 
     def __str__(self):
         return (
@@ -232,8 +232,8 @@ class ShoppingList(Model):
             )
         ]
         ordering = ('-id',)
-        verbose_name = 'Рецепт блюда в списке покупок'
-        verbose_name_plural = 'Рецепты блюд в списке покупок'
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Список покупок'
 
     def __str__(self):
         return (

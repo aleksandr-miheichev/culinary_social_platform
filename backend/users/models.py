@@ -45,6 +45,11 @@ class CustomUser(AbstractUser):
         verbose_name='Роль пользователя',
         help_text='Выберите роль для пользователя',
     )
+    password = CharField(
+        max_length=MAX_LENGTH_TEXT_USERS,
+        verbose_name='Пароль пользователя',
+        help_text='Введите свой пароль',
+    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', ]
 

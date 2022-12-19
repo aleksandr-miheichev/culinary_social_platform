@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.db.models import CharField
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework.fields import ReadOnlyField, SerializerMethodField
@@ -7,21 +6,17 @@ from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer
 from rest_framework.validators import UniqueTogetherValidator
 
-from foodgram.settings import MAX_LENGTH_PASSWORD
 from recipes.models import (FavoritesRecipe, Ingredient, Recipe,
                             RecipeIngredient, ShoppingList, Subscription, Tag)
 from users.models import CustomUser
 
 
 class CustomUserRegistrationSerializer(UserCreateSerializer):
-    password = CharField(
-        max_length=MAX_LENGTH_PASSWORD,
-    )
-
     class Meta(UserCreateSerializer.Meta):
         model = CustomUser
         fields = (
             'email',
+            'id',
             'username',
             'first_name',
             'last_name',
@@ -124,6 +119,11 @@ class RecipesSubscribedAuthor(ModelSerializer):
 
 class SubscriptionSerializer(ModelSerializer):
     """Сериализатор для подписки/отписки на автора рецептов."""
+    email = ReadOnlyField(source='subscribed_author.email')
+    id = ReadOnlyField(source='subscribed_author.id')
+    username = ReadOnlyField(source='subscribed_author.username')
+    first_name = ReadOnlyField(source='subscribed_author.first_name')
+    last_name = ReadOnlyField(source='subscribed_author.last_name')
     is_subscribed = SerializerMethodField()
     recipes = SerializerMethodField()
     recipes_count = SerializerMethodField()
@@ -138,7 +138,9 @@ class SubscriptionSerializer(ModelSerializer):
             'last_name',
             'is_subscribed',
             'recipes',
-            'recipes_count'
+            'recipes_count',
+            # 'user',
+            # 'subscribed_author',
         )
         validators = [
             UniqueTogetherValidator(
@@ -259,13 +261,13 @@ class PostPatchDeleteRecipeSerializer(ModelSerializer):
         model = Recipe
         fields = (
             'id',
-            'tags',
-            'author',
             'ingredients',
-            'name',
+            'tags',
             'image',
+            'name',
             'text',
-            'cooking_time'
+            'cooking_time',
+            'author',
         )
 
     def add_ingredients_recipe(self, ingredients, recipe):

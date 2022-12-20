@@ -58,14 +58,8 @@ class FavoriteAuthorsListViewSet(ReadOnlyModelViewSet):
     serializer_class = SubscriptionSerializer
     pagination_class = NumberRecordsPerPagePagination
 
-    def get_user(self):
-        return get_object_or_404(
-            CustomUser,
-            username=self.request.user.username
-        )
-
     def get_queryset(self):
-        return self.get_user().subscriber
+        return self.request.user.subscriber
 
 
 class CreateDestroySubscriptionViewSet(CreateDestroyViewSet):
@@ -151,18 +145,14 @@ class RecipesViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action == ('list', 'retrieve',):
             return [AllowAny]
-        elif self.action == ('update', 'partial_update', 'destroy',):
+        if self.action == ('update', 'partial_update', 'destroy',):
             return [IsAuthorOrAdmin]
         return super().get_permissions()
 
     @action(detail=False)
     def download_shopping_cart(self, request):
-        user = get_object_or_404(
-            CustomUser,
-            username=request.user.username
-        )
         queryset = RecipeIngredient.objects.filter(
-            recipe__in_shopping_list__user=user
+            recipe__in_shopping_list__user=request.user
         )
         values = queryset.values(
             'ingredient__name',

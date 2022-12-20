@@ -64,8 +64,8 @@ jobs:
             sudo docker pull aleksandrmiheichev/foodgram_backend:latest
             sudo docker pull aleksandrmiheichev/foodgram_frontend:latest           
             sudo docker compose stop
-            sudo docker compose rm web
-            sudo docker compose rm frontend
+            sudo docker compose rm -f frontend
+            sudo docker compose rm -f web
             touch .env
             echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env

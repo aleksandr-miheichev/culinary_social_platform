@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='xxxyyyzzzdddffffuuuuuiiiiiioooo')
 
 DEBUG = os.environ.get('DJANGO_DEBUG', False)
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default=['*', ])
+ALLOWED_HOSTS = ["51.250.95.17", "aleksmihdjango.ddns.net", ]
 
 INSTALLED_APPS = [
     'django.contrib.admin',

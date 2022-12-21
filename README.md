@@ -8,7 +8,7 @@
 - [Запуск проекта](#Запуск-проекта)
 - [Примеры работы с проектом](#Примеры-работы-с-проектом)
 - [Шаблон наполнения env-файла](#Шаблон-наполнения-env-файла)
-- [Инструкция для накачки базы из CSV-файлов:](#Инструкция-для-накачки-базы-из-CSV-файлов:)
+- [Инструкция для накачки базы из CSV-файлов:](#Инструкция-для-накачки-базы-из-CSV-файлов)
 - [Над frontend проекта работал](#Над-frontend-проекта-работал)
 - [Над backend проекта работал](#Над-backend-проекта-работал)
 
@@ -77,6 +77,20 @@ PDF.
 - [![gunicorn](https://img.shields.io/badge/gunicorn-%298729.svg?style=for-the-badge&logo=gunicorn&logoColor=white)](https://gunicorn.org/)
 
 
+### Копирование файлов на сервер с клонированного репозитория проекта:
+
+В терминале IDE (к примеру - PyCharm) открытом в папке
+```
+foodgram-project-react/infra
+```
+ввести команду для копирования необходимого файла на сервер:
+```
+scp docker-compose.yaml admin@51.250.95.17:/home/admin/docker-compose.yaml
+```
+```
+scp nginx/default.conf admin@51.250.95.17:/home/admin/nginx/default.conf
+```
+
 ### Примеры работы с проектом:
 
 Удобную веб-страницу со справочным меню, документацией для эндпоинтов и 
@@ -136,7 +150,7 @@ DB_PORT=5432
 
 SECRET_KEY=xxxxxyyyyyzzzzz
 
-ALLOWED_HOSTS=['55.222.99.11', 'localhost', 'praktikum.ddns.net', '*',]
+ALLOWED_HOSTS=['55.222.99.11', 'praktikum.ddns.net', ]
 
 ### Над frontend проекта работал:
 - [Yandex Praktikum](https://github.com/yandex-praktikum)

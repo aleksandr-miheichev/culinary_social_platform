@@ -157,4 +157,3 @@ ALLOWED_HOSTS=['55.222.99.11', 'praktikum.ddns.net', ]
 
 ### Над backend проекта работал:
 - [Михеичев Александр](https://github.com/aleksandr-miheichev)
-

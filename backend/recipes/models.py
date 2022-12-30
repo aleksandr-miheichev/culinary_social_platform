@@ -1,22 +1,23 @@
 from colorfield.fields import ColorField
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db.models import (CASCADE, CharField, ForeignKey, ImageField,
-                              IntegerField, ManyToManyField, Model, SlugField,
-                              TextField, UniqueConstraint)
+                              ManyToManyField, Model,
+                              PositiveSmallIntegerField, SlugField, TextField,
+                              UniqueConstraint)
 
-from foodgram.settings import MAX_LENGTH_COLOR, MAX_LENGTH_TEXT_RECIPES
 from recipes.validators import validate_slug
 from users.models import CustomUser
 
 
 class Ingredient(Model):
     name = CharField(
-        max_length=MAX_LENGTH_TEXT_RECIPES,
+        max_length=settings.MAX_LENGTH_TEXT_RECIPES,
         verbose_name='Наименование',
         help_text='Введите наименование для ингредиента',
     )
     measurement_unit = CharField(
-        max_length=MAX_LENGTH_TEXT_RECIPES,
+        max_length=settings.MAX_LENGTH_TEXT_RECIPES,
         verbose_name='Единица измерения',
         help_text='Введите единицу измерения для ингредиента',
     )
@@ -25,6 +26,12 @@ class Ingredient(Model):
         ordering = ('name',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_name_measurement_unit'
+            )
+        ]
 
     def __str__(self):
         return (
@@ -35,20 +42,20 @@ class Ingredient(Model):
 
 class Tag(Model):
     name = CharField(
-        max_length=MAX_LENGTH_TEXT_RECIPES,
+        max_length=settings.MAX_LENGTH_TEXT_RECIPES,
         unique=True,
         verbose_name='Название',
         help_text='Введите название тега',
     )
     color = ColorField(
-        max_length=MAX_LENGTH_COLOR,
+        max_length=settings.MAX_LENGTH_COLOR,
         default='#FF0000',
         unique=True,
         verbose_name='Цвет в формате hex',
         help_text='Выберите цвет для тега',
     )
     slug = SlugField(
-        max_length=MAX_LENGTH_TEXT_RECIPES,
+        max_length=settings.MAX_LENGTH_TEXT_RECIPES,
         unique=True,
         validators=[validate_slug, ],
         verbose_name='Идентификатор',
@@ -84,7 +91,7 @@ class Recipe(Model):
         help_text='Выберите ингредиент для рецепта'
     )
     name = CharField(
-        max_length=MAX_LENGTH_TEXT_RECIPES,
+        max_length=settings.MAX_LENGTH_TEXT_RECIPES,
         verbose_name='Название',
         help_text='Введите название рецепта',
     )
@@ -97,7 +104,7 @@ class Recipe(Model):
         verbose_name='Описание способа приготовления',
         help_text='Опишите способ приготовления данного блюда',
     )
-    cooking_time = IntegerField(
+    cooking_time = PositiveSmallIntegerField(
         validators=(MinValueValidator(1),),
         error_messages={
             'Ошибка': 'Пожалуйста, установите время приготовления данного '
@@ -131,7 +138,7 @@ class RecipeIngredient(Model):
         on_delete=CASCADE,
         verbose_name='Ингредиент'
     )
-    amount = IntegerField(
+    amount = PositiveSmallIntegerField(
         validators=(MinValueValidator(1),),
         verbose_name='Количество ингредиентов'
     )
@@ -148,8 +155,8 @@ class RecipeIngredient(Model):
 
     def __str__(self):
         return (
-            f'Рецепта блюда "{self.recipe}" '
-            f'состоит из ингредиентов "{self.ingredient}" '
+            f'Рецепта блюда "{self.recipe.name}" '
+            f'состоит из ингредиентов "{self.ingredient.name}" '
             f'и их количества равным соответственно "{self.amount}"'
 
         )
@@ -173,72 +180,65 @@ class RecipeTag(Model):
         verbose_name_plural = 'Рецепты и теги блюд'
 
     def __str__(self):
-        return f'У рецепта блюда "{self.recipe}" тег - "{self.tag}"'
+        return f'У рецепта блюда "{self.recipe.name}" тег - "{self.tag}"'
 
 
-class FavoritesRecipe(Model):
-    """Модель для добавления Рецепта в список Избранное."""
+class UserRecipeModel(Model):
+    """Абстрактная модель для модели Списка покупок и Избранное."""
     user = ForeignKey(
         CustomUser,
         on_delete=CASCADE,
-        related_name='favorites_recipe',
         verbose_name='Пользователь'
     )
     recipe = ForeignKey(
         Recipe,
         on_delete=CASCADE,
-        related_name='in_favorites',
         verbose_name='Рецепт'
     )
 
     class Meta:
+        abstract = True
+        default_related_name = '%(class)ss'
+        ordering = ('-id',)
+
+
+class FavoritesRecipe(UserRecipeModel):
+    """Модель для добавления Рецепта в список Избранное."""
+
+    class Meta(UserRecipeModel.Meta):
         constraints = [
             UniqueConstraint(
                 fields=['user', 'recipe'],
                 name='unique_recipe_in_favorites'
             )
         ]
-        ordering = ('-id',)
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
 
     def __str__(self):
         return (
-            f'Рецепт блюда "{self.recipe}" находится '
+            f'Рецепт блюда "{self.recipe.name}" находится '
             f'у пользователя "{self.user.username}" в Избранном'
         )
 
 
-class ShoppingList(Model):
+class ShoppingList(UserRecipeModel):
     """Модель для добавления Рецепта в Список покупок."""
-    user = ForeignKey(
-        CustomUser,
-        on_delete=CASCADE,
-        related_name='shopping_list',
-        verbose_name='Пользователь'
-    )
-    recipe = ForeignKey(
-        Recipe,
-        on_delete=CASCADE,
-        related_name='in_shopping_list',
-        verbose_name='Рецепт'
-    )
 
-    class Meta:
+    class Meta(UserRecipeModel.Meta):
         constraints = [
             UniqueConstraint(
                 fields=['user', 'recipe'],
                 name='unique_recipe_in_shopping_list'
             )
         ]
-        ordering = ('-id',)
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Список покупок'
 
     def __str__(self):
         return (
-            f'Рецепт блюда "{self.recipe}" находится '
-            f'у пользователя "{self.user.username}" в списке покупок'
+            f'Рецепт блюда "{self.recipe.name}" находится '
+            f'у пользователя "{self.user.username}" в Списке покупок'
         )
 
 

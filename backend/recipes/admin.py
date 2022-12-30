@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
+from django.utils.html import format_html
 
 from recipes.models import (FavoritesRecipe, Ingredient, Recipe,
                             RecipeIngredient, RecipeTag, ShoppingList,
@@ -7,12 +9,14 @@ from recipes.models import (FavoritesRecipe, Ingredient, Recipe,
 
 class RecipeIngredientInLine(admin.TabularInline):
     model = RecipeIngredient
-    extra = 1
+    min_num = 1
+    extra = 0
 
 
 class RecipeTagInLine(admin.TabularInline):
     model = RecipeTag
-    extra = 1
+    min_num = 1
+    extra = 0
 
 
 @admin.register(Ingredient)
@@ -45,6 +49,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'get_username_author',
         'name',
         'cooking_time',
+        'get_ingredients',
         'get_favorites_recipe_count'
     )
     search_fields = ('author__username', 'name', 'cooking_time',)
@@ -54,7 +59,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Число добавлений данного рецепта в Избранное')
     def get_favorites_recipe_count(self, obj):
-        return obj.in_favorites.count()
+        return obj.favoritesrecipes.count()
 
     @admin.display(
         ordering='author__username',
@@ -62,6 +67,18 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     def get_username_author(self, obj):
         return obj.author.username
+
+    @admin.display(description='Список ингредиентов')
+    def get_ingredients(self, obj):
+        values = RecipeIngredient.objects.filter(recipe=obj).values_list(
+            'ingredient__name',
+            flat=True
+        )
+        html = '<ul>'
+        for ingredient in values:
+            html += f'<li>{ingredient}</li>'
+        html += '</ul>'
+        return format_html(html)
 
 
 @admin.register(ShoppingList)
@@ -108,3 +125,6 @@ class TagAdmin(admin.ModelAdmin):
     list_filter = ('name', 'slug',)
     prepopulated_fields = {'slug': ('name',)}
     save_on_top = True
+
+
+admin.site.unregister(Group)

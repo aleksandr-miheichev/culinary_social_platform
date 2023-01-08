@@ -27,7 +27,7 @@ class Command(BaseCommand):
             "is loaded into the database and then data from the csv file with "
             "ingredients is loaded into the Ingredients model.")
 
-    def handle(self, *args, **kwargs): # noqa: C901
+    def handle(self, *args, **kwargs):  # noqa: C901
         for model, csv_file in TABLES.items():
             file_path = f'./static/data/{csv_file}'
             if model == Tag:

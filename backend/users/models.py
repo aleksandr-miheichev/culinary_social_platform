@@ -5,9 +5,6 @@ from django.db.models import CharField, EmailField, UniqueConstraint
 
 from users.validators import validate_username
 
-ADMIN = 'admin'
-USER = 'user'
-
 
 class CustomUser(AbstractUser):
     username = CharField(

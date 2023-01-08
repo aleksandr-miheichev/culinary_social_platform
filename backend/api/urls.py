@@ -1,7 +1,7 @@
 from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
 
-from api.views import (FavoriteAuthorsListViewSet, IngredientViewSet,
+from api.views import (FavoriteAuthorsListApiView, IngredientViewSet,
                        RecipesViewSet, SubscriptionApiView, TagViewSet)
 
 router_v1 = DefaultRouter()
@@ -18,7 +18,7 @@ users_urlpatterns = [
     ),
     path(
         'subscriptions/',
-        FavoriteAuthorsListViewSet.as_view({'get': 'list'}),
+        FavoriteAuthorsListApiView.as_view(),
         name='subscription'
     ),
 ]

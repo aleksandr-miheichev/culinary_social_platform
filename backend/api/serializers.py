@@ -4,7 +4,7 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework.fields import ReadOnlyField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer
-from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
 from recipes.models import (FavoritesRecipe, Ingredient, Recipe,
                             RecipeIngredient, ShoppingList, Subscription, Tag)
@@ -202,15 +202,19 @@ class PostIngredientInRecipeSerializer(ModelSerializer):
             'amount'
         )
 
+    def validate_amount(self, amount):
+        if amount <= 0:
+            raise ValidationError(
+                message='Укажите количество ингредиентов больше 0!'
+            )
+        return amount
+
 
 class GetRecipeSerializer(ModelSerializer):
     """Сериализатор для получения рецепта(ов)."""
     tags = TagSerializer(read_only=True, many=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = GetPatchIngredientInRecipeSerializer(
-        read_only=True,
-        many=True
-    )
+    ingredients = SerializerMethodField()
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()
 
@@ -228,6 +232,11 @@ class GetRecipeSerializer(ModelSerializer):
             'text',
             'cooking_time'
         )
+
+    def get_ingredients(self, obj):
+        return GetPatchIngredientInRecipeSerializer(
+            RecipeIngredient.objects.filter(recipe=obj), many=True
+        ).data
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
@@ -247,10 +256,14 @@ class PostPatchDeleteRecipeSerializer(ModelSerializer):
 
     tags = PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
-        many=True
+        many=True,
+        validators=[UniqueValidator(queryset=Tag.objects.all())]
     )
     author = CustomUserSerializer(read_only=True)
-    ingredients = PostIngredientInRecipeSerializer(many=True)
+    ingredients = PostIngredientInRecipeSerializer(
+        many=True,
+        validators=[UniqueValidator(queryset=Ingredient.objects.all())]
+    )
     image = Base64ImageField()
 
     class Meta:
@@ -265,6 +278,15 @@ class PostPatchDeleteRecipeSerializer(ModelSerializer):
             'cooking_time',
             'author',
         )
+
+    def validate(self, data):
+        if not data.get('tags'):
+            raise ValidationError(message='Выберите хотя бы один тег!')
+        if not data.get('ingredients'):
+            raise ValidationError(message='Выберите хотя бы один ингредиент!')
+        if data.get('cooking_time') <= 0:
+            raise ValidationError(message='Укажите время больше 0 минут!')
+        return data
 
     def add_ingredients_recipe(self, ingredients, recipe):
         RecipeIngredient.objects.bulk_create(RecipeIngredient(

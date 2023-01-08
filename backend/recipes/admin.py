@@ -57,7 +57,7 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = (RecipeIngredientInLine, RecipeTagInLine,)
     save_on_top = True
 
-    @admin.display(description='Число добавлений данного рецепта в Избранное')
+    @admin.display(description='Добавили в Избранное раз')
     def get_favorites_recipe_count(self, obj):
         return obj.favoritesrecipes.count()
 

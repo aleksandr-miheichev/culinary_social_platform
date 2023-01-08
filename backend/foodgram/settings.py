@@ -9,10 +9,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', default='xxxyyyzzzdddffffuuuuuiiiiiioooo')
 
-DEBUG = os.getenv("DEBUG", "False")
+DEBUG = os.environ.get('DJANGO_DEBUG', False)
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1').split()
-# ALLOWED_HOSTS = ['*']
+NEED_POSTGRESQL = os.environ.get('NEED_POSTGRESQL', False)
+
+# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1').split()
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -21,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django.contrib.postgres",
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
@@ -63,7 +66,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
-if DEBUG:
+if not NEED_POSTGRESQL:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -110,7 +113,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    "PAGE_SIZE": 6,
 }
 
 LANGUAGE_CODE = 'ru'

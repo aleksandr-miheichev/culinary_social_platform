@@ -105,13 +105,7 @@ class Recipe(Model):
         help_text='Опишите способ приготовления данного блюда',
     )
     cooking_time = PositiveSmallIntegerField(
-        validators=(MinValueValidator(1),),
-        error_messages={
-            'Ошибка': 'Пожалуйста, установите время приготовления данного '
-                      'рецепта более 1 минуты'
-        },
         verbose_name='Время приготовления в минутах',
-        help_text='Укажите время приготовления в минутах для данного блюда',
     )
 
     class Meta:

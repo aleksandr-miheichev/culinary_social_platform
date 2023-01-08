@@ -3,16 +3,15 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
-from rest_framework.viewsets import (GenericViewSet, ModelViewSet,
-                                     ReadOnlyModelViewSet)
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.filters import RecipeFilter
+from api.pagination import NumberRecordsPerPagePagination
 from api.serializers import (FavoritesRecipeSerializer, GetRecipeSerializer,
                              IngredientSerializer,
                              PostPatchDeleteRecipeSerializer,
@@ -24,29 +23,15 @@ from recipes.models import (FavoritesRecipe, Ingredient, Recipe,
 from users.models import CustomUser
 
 
-def object_creation(request, pk, obj):
-    data = {'user': request.user.id, 'recipe': pk}
-    serializer = obj(data=data)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-    return Response(data=serializer.data, status=HTTP_201_CREATED)
-
-
-class CreateDestroyViewSet(
-    CreateModelMixin,
-    DestroyModelMixin,
-    GenericViewSet
-):
-    """Создать или удалить объект при POST, DELETE запросе."""
-    pass
-
-
 class IngredientViewSet(ReadOnlyModelViewSet):
-    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
     filter_backends = (SearchFilter,)
-    search_fields = ('^name',)
+
+    def get_queryset(self):
+        return Ingredient.objects.filter(
+            name__search=self.request.GET.get('search')
+        )
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -55,10 +40,12 @@ class TagViewSet(ReadOnlyModelViewSet):
     permission_classes = (AllowAny,)
 
 
-class FavoriteAuthorsListViewSet(ReadOnlyModelViewSet):
-    """Вьюсет для отображения авторов рецептов, на которых подписан текущий
+class FavoriteAuthorsListApiView(ListAPIView):
+    """Для отображения авторов рецептов, на которых подписан текущий
     пользователь."""
     serializer_class = SubscriptionSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = NumberRecordsPerPagePagination
 
     def get_queryset(self):
         return self.request.user.subscriber
@@ -68,7 +55,24 @@ class RecipesViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_class = RecipeFilter
-    pagination_class = PageNumberPagination
+    pagination_class = NumberRecordsPerPagePagination
+
+    @staticmethod
+    def object_creation(request, pk, obj):
+        data = {'user': request.user.id, 'recipe': pk}
+        serializer = obj(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data, status=HTTP_201_CREATED)
+
+    @staticmethod
+    def object_delete(request, pk, model):
+        get_object_or_404(
+            model,
+            user=request.user,
+            recipe=get_object_or_404(Recipe, id=pk),
+        ).delete()
+        return Response(status=HTTP_204_NO_CONTENT)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -81,15 +85,11 @@ class RecipesViewSet(ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, pk):
-        object_creation(request, pk, FavoritesRecipeSerializer)
+        self.object_creation(request, pk, FavoritesRecipeSerializer)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        favorite = get_object_or_404(FavoritesRecipe, user=user, recipe=recipe)
-        favorite.delete()
-        return Response(status=HTTP_204_NO_CONTENT)
+        self.object_delete(request, pk, FavoritesRecipe)
 
     @action(
         methods=['POST'],
@@ -97,23 +97,11 @@ class RecipesViewSet(ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def shopping_cart(self, request, pk):
-        data = {'user': request.user.id, 'recipe': pk}
-        serializer = ShoppingListSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(data=serializer.data, status=HTTP_201_CREATED)
+        self.object_creation(request, pk, ShoppingListSerializer)
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        shopping_list = get_object_or_404(
-            ShoppingList,
-            user=user,
-            recipe=recipe
-        )
-        shopping_list.delete()
-        return Response(status=HTTP_204_NO_CONTENT)
+        self.object_delete(request, pk, ShoppingList)
 
     @action(detail=False)
     def download_shopping_cart(self, request):
@@ -130,19 +118,17 @@ class SubscriptionApiView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
-        data = {'user': request.user.id, 'subscribed_author': id}
-        serializer = SubscriptionSerializer(data=data)
+        serializer = SubscriptionSerializer(
+            data={'user': request.user.id, 'subscribed_author': id}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data=serializer.data, status=HTTP_201_CREATED)
 
     def delete(self, request, id):
-        user = request.user
-        subscribed_author = get_object_or_404(CustomUser, id=id)
-        subscription = get_object_or_404(
+        get_object_or_404(
             Subscription,
-            user=user,
-            subscribed_author=subscribed_author
-        )
-        subscription.delete()
+            user=request.user,
+            subscribed_author=get_object_or_404(CustomUser, id=id)
+        ).delete()
         return Response(status=HTTP_204_NO_CONTENT)

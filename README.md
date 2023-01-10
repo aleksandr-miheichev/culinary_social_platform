@@ -85,10 +85,10 @@ foodgram-project-react/infra
 ```
 ввести команду для копирования необходимого файла на сервер:
 ```
-scp docker-compose.yaml admin@51.250.95.17:/home/admin/docker-compose.yaml
+scp docker-compose.yaml test@51.250.13.72:/home/test/docker-compose.yaml
 ```
 ```
-scp nginx/default.conf admin@51.250.95.17:/home/admin/nginx/default.conf
+scp nginx/default.conf test@51.250.13.72:/home/test/nginx/default.conf
 ```
 
 ### Примеры работы с проектом:

@@ -97,7 +97,7 @@ scp nginx/default.conf admin@51.250.95.17:/home/admin/nginx/default.conf
 разрешённых методов, с примерами запросов, ответов и кода Вы сможете посмотреть 
 по адресу:
 
-[https://aleksmihdjango.ddns.net/redoc/](https://aleksmihdjango.ddns.net/redoc/)
+[https://aleksdjango.ddns.net/redoc/](https://aleksdjango.ddns.net/redoc/)
 
 ### Инструкция для накачки базы из CSV-файлов:
 

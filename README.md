@@ -88,7 +88,7 @@ foodgram-project-react/infra
 scp docker-compose.yaml test@62.84.114.207:/home/test/docker-compose.yaml
 ```
 ```
-scp nginx/default.conf test@62.84.114.207:/home/test/nginx/default.conf
+scp data/nginx/default.conf test@62.84.114.207:/home/test/data/nginx/default.conf
 ```
 
 ### Примеры работы с проектом:

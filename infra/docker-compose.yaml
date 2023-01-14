@@ -23,7 +23,7 @@ services:
   frontend:
     image: aleksandrmiheichev/foodgram_frontend:latest
     volumes:
-      - ../frontend/:/app/result_build/
+      - ./frontend/:/app/result_build/
     depends_on:
       - web
 
@@ -32,8 +32,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./data/nginx:/etc/nginx/conf.d
-      - ../frontend/build:/usr/share/nginx/html/
-      - ../docs/:/usr/share/nginx/html/api/docs/
+      - ./frontend/build:/usr/share/nginx/html/
+      - ./docs/:/usr/share/nginx/html/api/docs/
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
       - static_value:/var/html/static/

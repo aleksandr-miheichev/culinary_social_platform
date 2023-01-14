@@ -152,6 +152,10 @@ SECRET_KEY=xxxxxyyyyyzzzzz
 
 ALLOWED_HOSTS=['55.222.99.11', 'praktikum.ddns.net', ]
 
+CSRF_TRUSTED_ORIGINS=['https://example.com']
+
+NEED_POSTGRESQL=True
+
 ### Над frontend проекта работал:
 - [Yandex Praktikum](https://github.com/yandex-praktikum)
 

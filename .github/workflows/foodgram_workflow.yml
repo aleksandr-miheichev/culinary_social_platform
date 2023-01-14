@@ -77,6 +77,7 @@ jobs:
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             echo DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }} >> .env
             echo NEED_POSTGRESQL=${{ secrets.NEED_POSTGRESQL }} >> .env
+            echo CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }} >> .env
             sudo docker compose up -d
 
   send_message:

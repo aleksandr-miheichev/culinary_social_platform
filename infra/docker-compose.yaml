@@ -36,7 +36,7 @@ services:
       - ./docs/:/usr/share/nginx/html/api/docs/
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
-      - static_value:/var/html/static/
+      - static_value:/var/html/static-backend/
       - media_value:/var/html/media/
     ports:
       - "80:80"

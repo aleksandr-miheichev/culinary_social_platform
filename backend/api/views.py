@@ -57,7 +57,7 @@ class RecipesViewSet(ModelViewSet):
     @staticmethod
     def object_creation(request, pk, obj):
         data = {'user': request.user.id, 'recipe': pk}
-        serializer = obj(data=data)
+        serializer = obj(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data=serializer.data, status=HTTP_201_CREATED)

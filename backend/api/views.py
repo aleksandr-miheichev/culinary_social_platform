@@ -60,7 +60,6 @@ class RecipesViewSet(ModelViewSet):
             return GetRecipeSerializer
         return PostPatchDeleteRecipeSerializer
 
-
     @staticmethod
     def object_creation(request, pk, obj):
         data = {'user': request.user.id, 'recipe': pk}

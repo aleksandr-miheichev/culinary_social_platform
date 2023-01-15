@@ -2,7 +2,6 @@ from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
-from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -12,6 +11,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import NumberRecordsPerPagePagination
+from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (FavoritesRecipeSerializer, GetRecipeSerializer,
                              IngredientSerializer,
                              PostPatchDeleteRecipeSerializer,
@@ -50,9 +50,16 @@ class FavoriteAuthorsListApiView(ListAPIView):
 
 class RecipesViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
+    permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filter_class = RecipeFilter
     pagination_class = NumberRecordsPerPagePagination
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return GetRecipeSerializer
+        return PostPatchDeleteRecipeSerializer
+
 
     @staticmethod
     def object_creation(request, pk, obj):
@@ -64,17 +71,13 @@ class RecipesViewSet(ModelViewSet):
 
     @staticmethod
     def object_delete(request, pk, model):
-        get_object_or_404(
+        obj = get_object_or_404(
             model,
             user=request.user,
-            recipe=get_object_or_404(Recipe, id=pk),
-        ).delete()
+            recipe=get_object_or_404(Recipe, pk=pk),
+        )
+        obj.delete()
         return Response(status=HTTP_204_NO_CONTENT)
-
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return GetRecipeSerializer
-        return PostPatchDeleteRecipeSerializer
 
     @action(
         methods=['POST'],

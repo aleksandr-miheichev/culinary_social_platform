@@ -1,6 +1,15 @@
-from django_filters import AllValuesMultipleFilter, BooleanFilter, FilterSet
+from django_filters import (AllValuesMultipleFilter, BooleanFilter, CharFilter,
+                            FilterSet)
 
-from recipes.models import Recipe
+from recipes.models import Ingredient, Recipe
+
+
+class IngredientFilter(FilterSet):
+    name = CharFilter(field_name='name', lookup_expr='icontains')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
 
 
 class RecipeFilter(FilterSet):

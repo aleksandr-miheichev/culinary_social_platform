@@ -10,7 +10,7 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from api.filters import RecipeFilter
+from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import NumberRecordsPerPagePagination
 from api.serializers import (FavoritesRecipeSerializer, GetRecipeSerializer,
                              IngredientSerializer,
@@ -24,14 +24,11 @@ from users.models import CustomUser
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
     filter_backends = (SearchFilter,)
-
-    def get_queryset(self):
-        return Ingredient.objects.filter(
-            name__search=self.request.GET.get('search')
-        )
+    filterset_class = IngredientFilter
 
 
 class TagViewSet(ReadOnlyModelViewSet):

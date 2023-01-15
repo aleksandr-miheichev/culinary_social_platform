@@ -116,7 +116,8 @@ class SubscriptionApiView(APIView):
 
     def post(self, request, id):
         serializer = SubscriptionSerializer(
-            data={'user': request.user.id, 'subscribed_author': id}
+            data={'user': request.user.id, 'subscribed_author': id},
+            context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()

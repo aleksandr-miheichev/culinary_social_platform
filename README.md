@@ -106,11 +106,11 @@ scp data/nginx/default.conf test@62.84.114.207:/home/test/data/nginx/default.con
 
 В терминале сервера ввести команду для просмотра описания management-команды:
 ```
-sudo docker compose exec backend python manage.py data_loading -h
+sudo docker compose exec web python manage.py data_loading -h
 ```
 Для выполнения процедуры загрузки в базу данных необходимо выполнить:
 ```
-sudo docker compose exec backend python manage.py data_loading
+sudo docker compose exec web python manage.py data_loading
 ```
 После этого будет выведено сообщение в терминал о начале загрузки в базу 
 данных:

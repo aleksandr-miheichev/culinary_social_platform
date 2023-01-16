@@ -116,19 +116,19 @@ class RecipesViewSet(ModelViewSet):
 class SubscriptionApiView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, id):
+    def post(self, request, pk):
         serializer = SubscriptionSerializer(
-            data={'user': request.user.id, 'subscribed_author': id},
+            data={'user': request.user.id, 'subscribed_author': pk},
             context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data=serializer.data, status=HTTP_201_CREATED)
 
-    def delete(self, request, id):
+    def delete(self, request, pk):
         get_object_or_404(
             Subscription,
             user=request.user,
-            subscribed_author=get_object_or_404(CustomUser, id=id)
+            subscribed_author=get_object_or_404(CustomUser, id=pk)
         ).delete()
         return Response(status=HTTP_204_NO_CONTENT)

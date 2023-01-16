@@ -123,7 +123,7 @@ TIME_ZONE = 'Europe/Moscow'
 
 USE_TZ = True
 
-STATIC_URL = '/static-backend/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'

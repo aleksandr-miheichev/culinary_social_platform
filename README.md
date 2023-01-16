@@ -90,6 +90,17 @@ scp docker-compose.yaml test@62.84.114.207:/home/test/docker-compose.yaml
 ```
 scp data/nginx/default.conf test@62.84.114.207:/home/test/data/nginx/default.conf
 ```
+В терминале IDE (к примеру - PyCharm) открытом в папке
+```
+foodgram-project-react/docs
+```
+ввести команду для копирования необходимого файла на сервер:
+```
+scp redoc.html test@62.84.114.207:/home/test/docs/redoc.html
+```
+```
+scp openapi-schema.yaml test@62.84.114.207:/home/test/docs/openapi-schema.yaml
+```
 
 ### Примеры работы с проектом:
 
@@ -97,7 +108,7 @@ scp data/nginx/default.conf test@62.84.114.207:/home/test/data/nginx/default.con
 разрешённых методов, с примерами запросов, ответов и кода Вы сможете посмотреть 
 по адресу:
 
-[https://aleksdjango.ddns.net/redoc/](https://aleksdjango.ddns.net/redoc/)
+[https://aleksdjango.ddns.net/api/docs/](https://aleksdjango.ddns.net/api/docs/)
 
 ### Инструкция для накачки базы из CSV-файлов:
 

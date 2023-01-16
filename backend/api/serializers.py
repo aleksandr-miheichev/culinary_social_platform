@@ -145,7 +145,7 @@ class SubscriptionSerializer(ModelSerializer):
         ]
 
     def validate(self, data):
-        if data['subscribed_author'] == self.context['request'].user:
+        if data['subscribed_author'] == self.context.get('request').user:
             raise ValidationError(
                 'Нельзя подписаться на самого себя!'
             )
@@ -299,7 +299,7 @@ class PostPatchDeleteRecipeSerializer(ModelSerializer):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(
-            author=self.context['request'].user,
+            author=self.context.get('request').user,
             **validated_data
         )
         self.add_ingredients_recipe(ingredients, recipe)
@@ -318,4 +318,7 @@ class PostPatchDeleteRecipeSerializer(ModelSerializer):
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
-        return GetRecipeSerializer(instance).data
+        return GetRecipeSerializer(
+            instance,
+            context={'request': self.context.get('request')}
+        ).data

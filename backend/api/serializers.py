@@ -257,12 +257,10 @@ class PostPatchDeleteRecipeSerializer(ModelSerializer):
     tags = PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True,
-        validators=[UniqueValidator(queryset=Tag.objects.all())]
     )
     author = CustomUserSerializer(read_only=True)
     ingredients = PostIngredientInRecipeSerializer(
         many=True,
-        validators=[UniqueValidator(queryset=Ingredient.objects.all())]
     )
     image = Base64ImageField()
 
@@ -287,6 +285,18 @@ class PostPatchDeleteRecipeSerializer(ModelSerializer):
         if data.get('cooking_time') <= 0:
             raise ValidationError(message='Укажите время больше 0 минут!')
         return data
+
+    def validate_ingredients(self, value):
+        ingredients = [ingredient['id'] for ingredient in value]
+        if len(ingredients) != len(set(ingredients)):
+            raise ValidationError(message='Ингредиенты повторяются!')
+        return value
+
+    def validate_tags(self, value):
+        tags = [tag['id'] for tag in value]
+        if len(tags) != len(set(tags)):
+            raise ValidationError(message='Теги повторяются!')
+        return value
 
     def add_ingredients_recipe(self, ingredients, recipe):
         RecipeIngredient.objects.bulk_create(RecipeIngredient(

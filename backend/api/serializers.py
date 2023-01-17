@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework.fields import ReadOnlyField, SerializerMethodField
@@ -300,8 +301,11 @@ class PostPatchDeleteRecipeSerializer(ModelSerializer):
 
     def add_ingredients_recipe(self, ingredients, recipe):
         RecipeIngredient.objects.bulk_create(RecipeIngredient(
-            recipe=recipe['id'],
-            ingredient=ingredient['id'],
+            recipe=recipe,
+            ingredient=get_object_or_404(
+                Ingredient,
+                id=ingredient['id']
+            ),
             amount=ingredient['amount']
         ) for ingredient in ingredients)
 

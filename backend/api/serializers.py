@@ -293,7 +293,7 @@ class PostPatchDeleteRecipeSerializer(ModelSerializer):
         return value
 
     def validate_tags(self, value):
-        tags = [tag['id'] for tag in value]
+        tags = [tag.id for tag in value]
         if len(tags) != len(set(tags)):
             raise ValidationError(message='Теги повторяются!')
         return value

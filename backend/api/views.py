@@ -106,19 +106,19 @@ class RecipesViewSet(ModelViewSet):
         return PostPatchDeleteRecipeSerializer
 
     @staticmethod
-    def object_creation(request, pk, obj):
-        data = {'user': request.user.id, 'recipe': pk}
+    def object_creation(request, id, obj):
+        data = {'user': request.user.id, 'recipe': id}
         serializer = obj(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data=serializer.data, status=HTTP_201_CREATED)
 
     @staticmethod
-    def object_delete(request, pk, model):
+    def object_delete(request, id, model):
         obj = get_object_or_404(
             model,
             user=request.user,
-            recipe=get_object_or_404(Recipe, pk=pk),
+            recipe=get_object_or_404(Recipe, id=id),
         )
         obj.delete()
         return Response(status=HTTP_204_NO_CONTENT)
@@ -128,24 +128,24 @@ class RecipesViewSet(ModelViewSet):
         detail=True,
         permission_classes=[IsAuthenticated]
     )
-    def favorite(self, request, pk):
-        return self.object_creation(request, pk, FavoritesRecipeSerializer)
+    def favorite(self, request, id):
+        return self.object_creation(request, id, FavoritesRecipeSerializer)
 
     @favorite.mapping.delete
-    def delete_favorite(self, request, pk):
-        return self.object_delete(request, pk, FavoritesRecipe)
+    def delete_favorite(self, request, id):
+        return self.object_delete(request, id, FavoritesRecipe)
 
     @action(
         methods=['POST'],
         detail=True,
         permission_classes=[IsAuthenticated]
     )
-    def shopping_cart(self, request, pk):
-        return self.object_creation(request, pk, ShoppingListSerializer)
+    def shopping_cart(self, request, id):
+        return self.object_creation(request, id, ShoppingListSerializer)
 
     @shopping_cart.mapping.delete
-    def delete_shopping_cart(self, request, pk):
-        return self.object_delete(request, pk, ShoppingList)
+    def delete_shopping_cart(self, request, id):
+        return self.object_delete(request, id, ShoppingList)
 
     @action(detail=False)
     def download_shopping_cart(self, request):
@@ -163,7 +163,7 @@ class SubscriptionApiView(APIView):
     model = Subscription
 
     def post(self, request, *args, **kwargs):
-        subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('pk'))
+        subscribed_author = get_object_or_404(CustomUser, id=kwargs.get('id'))
         try:
             self.model.objects.create(
                 user=request.user,
@@ -183,7 +183,7 @@ class SubscriptionApiView(APIView):
         )
 
     def delete(self, request, *args, **kwargs):
-        subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('pk'))
+        subscribed_author = get_object_or_404(CustomUser, id=kwargs.get('id'))
         if not self.model.objects.filter(
                 user=request.user,
                 subscribed_author=subscribed_author

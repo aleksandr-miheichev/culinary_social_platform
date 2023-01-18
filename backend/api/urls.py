@@ -1,4 +1,4 @@
-from django.urls import include, path, re_path
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from api.views import (IngredientViewSet, RecipesViewSet, SubscriptionApiView,
@@ -12,8 +12,8 @@ router_v1.register('ingredients', IngredientViewSet, basename='ingredients')
 router_v1.register('recipes', RecipesViewSet, basename='recipes')
 
 users_urlpatterns = [
-    re_path(
-        r'(?P<pk>\d+)/subscribe/',
+    path(
+        '<int:id>/subscribe/',
         SubscriptionApiView.as_view(),
         name='subscribe'
     ),

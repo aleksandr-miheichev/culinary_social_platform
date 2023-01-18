@@ -22,6 +22,5 @@ users_urlpatterns = [
 urlpatterns = [
     path('', include(router_v1.urls)),
     path('users/', include(users_urlpatterns)),
-    path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
 ]

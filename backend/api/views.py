@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -5,7 +6,8 @@ from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
+                                   HTTP_400_BAD_REQUEST)
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
@@ -115,20 +117,40 @@ class RecipesViewSet(ModelViewSet):
 
 class SubscriptionApiView(APIView):
     permission_classes = [IsAuthenticated]
+    model = Subscription
 
-    def post(self, request, pk):
-        serializer = SubscriptionSerializer(
-            data={'user': request.user.id, 'subscribed_author': pk},
-            context={'request': request}
+    def post(self, request, *args, **kwargs):
+        subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('pk'))
+        try:
+            self.model.objects.create(
+                user=request.user,
+                subscription=subscribed_author
+            )
+        except ValidationError as error:
+            return Response(
+                {'errors': str(error)},
+                status=HTTP_400_BAD_REQUEST
+            )
+        return Response(
+            SubscriptionSerializer(
+                subscribed_author,
+                context={'request': request}
+            ).data,
+            status=HTTP_201_CREATED,
         )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(data=serializer.data, status=HTTP_201_CREATED)
 
-    def delete(self, request, pk):
-        get_object_or_404(
-            Subscription,
+    def delete(self, request, *args, **kwargs):
+        subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('pk'))
+        if not self.model.objects.filter(
+                user=request.user,
+                subscription=subscribed_author
+        ).exists():
+            return Response(
+                {'errors': 'Подписка не найдена!'},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        self.model.objects.get(
             user=request.user,
-            subscribed_author=get_object_or_404(CustomUser, id=pk)
+            subscription=subscribed_author
         ).delete()
         return Response(status=HTTP_204_NO_CONTENT)

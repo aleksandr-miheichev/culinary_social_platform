@@ -1,7 +1,7 @@
-from django_filters import (AllValuesMultipleFilter, BooleanFilter, CharFilter,
-                            FilterSet)
+from django_filters import (BooleanFilter, CharFilter, FilterSet,
+                            ModelMultipleChoiceFilter)
 
-from recipes.models import Ingredient, Recipe
+from recipes.models import Ingredient, Recipe, Tag
 
 
 class IngredientFilter(FilterSet):
@@ -15,7 +15,11 @@ class IngredientFilter(FilterSet):
 class RecipeFilter(FilterSet):
     is_favorited = BooleanFilter(method='get_is_favorited')
     is_in_shopping_cart = BooleanFilter(method='get_is_in_shopping_cart')
-    tags = AllValuesMultipleFilter(field_name='tags__slug')
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__slug',
+        to_field_name="slug",
+        queryset=Tag.objects.all(),
+    )
 
     class Meta:
         model = Recipe
@@ -28,10 +32,12 @@ class RecipeFilter(FilterSet):
 
     def get_is_favorited(self, queryset, name, value):
         if value:
-            return queryset.filter(favoritesrecipes__user=self.request.user)
-        return queryset
+            return Recipe.objects.filter(
+                favoritesrecipes__user=self.request.user
+            )
+        return Recipe.objects.all()
 
     def get_is_in_shopping_cart(self, queryset, name, value):
         if value:
-            return queryset.filter(shoppinglists__user=self.request.user)
-        return queryset
+            return Recipe.objects.filter(shoppinglists__user=self.request.user)
+        return Recipe.objects.all()

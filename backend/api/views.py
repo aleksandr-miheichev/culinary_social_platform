@@ -54,7 +54,7 @@ class RecipesViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    filter_class = RecipeFilter
+    filterset_class = RecipeFilter
     pagination_class = NumberRecordsPerPagePagination
 
     def get_serializer_class(self):
@@ -124,7 +124,7 @@ class SubscriptionApiView(APIView):
         try:
             self.model.objects.create(
                 user=request.user,
-                subscription=subscribed_author
+                subscribed_author=subscribed_author
             )
         except ValidationError as error:
             return Response(
@@ -143,7 +143,7 @@ class SubscriptionApiView(APIView):
         subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('pk'))
         if not self.model.objects.filter(
                 user=request.user,
-                subscription=subscribed_author
+                subscribed_author=subscribed_author
         ).exists():
             return Response(
                 {'errors': 'Подписка не найдена!'},
@@ -151,6 +151,6 @@ class SubscriptionApiView(APIView):
             )
         self.model.objects.get(
             user=request.user,
-            subscription=subscribed_author
+            subscribed_author=subscribed_author
         ).delete()
         return Response(status=HTTP_204_NO_CONTENT)

@@ -75,7 +75,10 @@ class FavoritesRecipeSerializer(ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        return RecipesSubscribedAuthor(instance.recipe).data
+        return RecipesSubscribedAuthor(
+            instance.recipe,
+            context={'request': self.context.get('request')}
+        ).data
 
 
 class ShoppingListSerializer(ModelSerializer):
@@ -161,11 +164,17 @@ class SubscriptionSerializer(ModelSerializer):
 
     def get_recipes(self, obj):
         request = self.context.get('request')
-        recipes_limit = request.query_params['recipes_limit']
+        recipes_limit = request.query_params.get('recipes_limit')
         queryset = obj.subscribed_author.recipes.all()
         if recipes_limit:
             queryset = queryset[:int(recipes_limit)]
-        return RecipesSubscribedAuthor(queryset, many=True).data
+        else:
+            queryset = queryset
+        return RecipesSubscribedAuthor(
+            queryset,
+            many=True,
+            context={'request': request}
+        ).data
 
     def get_recipes_count(self, obj):
         return obj.subscribed_author.recipes.count()

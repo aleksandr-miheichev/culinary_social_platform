@@ -4,8 +4,8 @@ from django_filters import (BooleanFilter, CharFilter, FilterSet,
 from recipes.models import Ingredient, Recipe, Tag
 
 model_filter = {
-    'favoritesrecipes': 'favoritesrecipes__user',
-    'shoppinglists': 'shoppinglists__user'
+    'favoritesrecipe': 'recipes_favoritesrecipe_related__user',
+    'shoppinglist': 'recipes_shoppinglist_related__user'
 }
 
 
@@ -41,7 +41,7 @@ class RecipeFilter(FilterSet):
         return queryset
 
     def get_is_favorited(self, queryset, name, value):
-        return self.queryset(queryset, name, value, 'favoritesrecipes')
+        return self.queryset(queryset, name, value, 'favoritesrecipe')
 
     def get_is_in_shopping_cart(self, queryset, name, value):
-        return self.queryset(queryset, name, value, 'shoppinglists')
+        return self.queryset(queryset, name, value, 'shoppinglist')

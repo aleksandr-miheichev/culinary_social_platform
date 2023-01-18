@@ -2,12 +2,13 @@ from django.core.exceptions import ValidationError
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
 from rest_framework.decorators import action
-from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
-                                   HTTP_400_BAD_REQUEST)
+from rest_framework.status import (HTTP_200_OK, HTTP_201_CREATED,
+                                   HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST,
+                                   HTTP_404_NOT_FOUND)
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
@@ -25,6 +26,59 @@ from recipes.models import (FavoritesRecipe, Ingredient, Recipe,
 from users.models import CustomUser
 
 
+class UserViewSet(UserViewSet):
+
+    pagination_class = NumberRecordsPerPagePagination
+    http_method_names = ('get', 'post', 'head')
+
+    def serializer(*args, **kwargs):
+        return SubscriptionSerializer(
+            kwargs.get('queryset'),
+            context={'request': kwargs.get('request')},
+            many=True,
+        ).data
+
+    @action(
+        methods=('get',),
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+    )
+    def subscriptions(self, request):
+        queryset = CustomUser.objects.filter(
+            subscribed_author__user=request.user
+        )
+        data = self.paginate_queryset(queryset)
+        if data is not None:
+            return self.get_paginated_response(
+                self.serializer(queryset=data, request=request)
+            )
+        return Response(
+            self.serializer(queryset=queryset, request=request),
+            status=HTTP_200_OK,
+        )
+
+    def reset_password(self, request, *args, **kwargs):
+        return Response(status=HTTP_404_NOT_FOUND)
+
+    def activation(self, request, *args, **kwargs):
+        return Response(status=HTTP_404_NOT_FOUND)
+
+    def resend_activation(self, request, *args, **kwargs):
+        return Response(status=HTTP_404_NOT_FOUND)
+
+    def reset_username(self, request, *args, **kwargs):
+        return Response(status=HTTP_404_NOT_FOUND)
+
+    def set_username(self, request, *args, **kwargs):
+        return Response(status=HTTP_404_NOT_FOUND)
+
+    def reset_password_confirm(self, request, *args, **kwargs):
+        return Response(status=HTTP_404_NOT_FOUND)
+
+    def reset_username_confirm(self, request, *args, **kwargs):
+        return Response(status=HTTP_404_NOT_FOUND)
+
+
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
@@ -37,17 +91,6 @@ class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (AllowAny,)
-
-
-class FavoriteAuthorsListApiView(ListAPIView):
-    """Для отображения авторов рецептов, на которых подписан текущий
-    пользователь."""
-    serializer_class = SubscriptionSerializer
-    permission_classes = [IsAuthenticated]
-    pagination_class = NumberRecordsPerPagePagination
-
-    def get_queryset(self):
-        return self.request.user.subscriber
 
 
 class RecipesViewSet(ModelViewSet):

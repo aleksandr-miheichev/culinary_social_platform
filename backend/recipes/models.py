@@ -192,7 +192,7 @@ class UserRecipeModel(Model):
 
     class Meta:
         abstract = True
-        default_related_name = '%(class)ss'
+        default_related_name = "%(app_label)s_%(class)s_related"
         ordering = ('-id',)
 
 

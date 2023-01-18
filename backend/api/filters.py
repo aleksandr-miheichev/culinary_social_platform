@@ -3,11 +3,6 @@ from django_filters import (BooleanFilter, CharFilter, FilterSet,
 
 from recipes.models import Ingredient, Recipe, Tag
 
-model_filter = {
-    'favoritesrecipe': 'recipes_favoritesrecipe_related__user',
-    'shoppinglist': 'recipes_shoppinglist_related__user'
-}
-
 
 class IngredientFilter(FilterSet):
     name = CharFilter(field_name='name', lookup_expr='istartswith')
@@ -35,13 +30,16 @@ class RecipeFilter(FilterSet):
             'tags',
         )
 
-    def queryset(self, queryset, name, value, model):
-        if value:
-            return queryset.filter(**{model_filter[model]: self.request.user})
-        return queryset
-
     def get_is_favorited(self, queryset, name, value):
-        return self.queryset(queryset, name, value, 'favoritesrecipe')
+        if value:
+            return Recipe.objects.filter(
+                recipes_favoritesrecipe_related__user=self.request.user
+            )
+        return Recipe.objects.all()
 
     def get_is_in_shopping_cart(self, queryset, name, value):
-        return self.queryset(queryset, name, value, 'shoppinglist')
+        if value:
+            return Recipe.objects.filter(
+                recipes_shoppinglist_related__user=self.request.user
+            )
+        return Recipe.objects.all()

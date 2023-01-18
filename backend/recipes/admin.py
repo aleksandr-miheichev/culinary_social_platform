@@ -59,7 +59,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Добавили в Избранное раз')
     def get_favorites_recipe_count(self, obj):
-        return obj.favoritesrecipes.count()
+        return obj.recipes_favoritesrecipe_related.count()
 
     @admin.display(
         ordering='author__username',

@@ -242,13 +242,17 @@ class GetRecipeSerializer(ModelSerializer):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        return request.user.favoritesrecipes.filter(id=obj.id).exists()
+        return request.user.recipes_favoritesrecipe_related.filter(
+            id=obj.id
+        ).exists()
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        return request.user.shoppinglists.filter(id=obj.id).exists()
+        return request.user.recipes_shoppinglist_related.filter(
+            id=obj.id
+        ).exists()
 
 
 class PostPatchDeleteRecipeSerializer(ModelSerializer):

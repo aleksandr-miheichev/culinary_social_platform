@@ -150,7 +150,7 @@ class RecipesViewSet(ModelViewSet):
     @action(detail=False)
     def download_shopping_cart(self, request):
         queryset = RecipeIngredient.objects.filter(
-            recipe__shoppinglists__user=request.user
+            recipe__recipes_shoppinglist_related__user=request.user
         ).values(
             'ingredient__name',
             'ingredient__measurement_unit'

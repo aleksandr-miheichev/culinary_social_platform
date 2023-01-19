@@ -124,10 +124,6 @@ class RecipesSubscribedAuthor(ModelSerializer):
 
 class SubscriptionSerializer(ModelSerializer):
     """Сериализатор для подписки/отписки на автора рецептов."""
-    user = PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
-    subscribed_author = PrimaryKeyRelatedField(
-        queryset=CustomUser.objects.all()
-    )
     email = ReadOnlyField(source='subscribed_author.email')
     id = ReadOnlyField(source='subscribed_author.id')
     username = ReadOnlyField(source='subscribed_author.username')
@@ -148,8 +144,6 @@ class SubscriptionSerializer(ModelSerializer):
             'is_subscribed',
             'recipes',
             'recipes_count',
-            'user',
-            'subscribed_author',
         )
         validators = [
             UniqueTogetherValidator(

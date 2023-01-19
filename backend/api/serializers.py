@@ -171,7 +171,7 @@ class SubscriptionSerializer(ModelSerializer):
         if not request or request.user.is_anonymous:
             return False
         return Subscription.objects.filter(
-            user=obj.user,
+            user=request.user,
             subscribed_author=obj.subscribed_author
         ).exists()
 

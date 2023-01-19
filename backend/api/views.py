@@ -107,19 +107,19 @@ class RecipesViewSet(ModelViewSet):
         return PostPatchDeleteRecipeSerializer
 
     @staticmethod
-    def object_creation(request, id, obj):
-        data = {'user': request.user.id, 'recipe': id}
+    def object_creation(request, pk, obj):
+        data = {'user': request.user.id, 'recipe': pk}
         serializer = obj(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data=serializer.data, status=HTTP_201_CREATED)
 
     @staticmethod
-    def object_delete(request, id, model):
+    def object_delete(request, pk, model):
         obj = get_object_or_404(
             model,
             user=request.user,
-            recipe=get_object_or_404(Recipe, id=id),
+            recipe=get_object_or_404(Recipe, id=pk),
         )
         obj.delete()
         return Response(status=HTTP_204_NO_CONTENT)
@@ -129,24 +129,24 @@ class RecipesViewSet(ModelViewSet):
         detail=True,
         permission_classes=[IsAuthenticated]
     )
-    def favorite(self, request, id):
-        return self.object_creation(request, id, FavoritesRecipeSerializer)
+    def favorite(self, request, pk):
+        return self.object_creation(request, pk, FavoritesRecipeSerializer)
 
     @favorite.mapping.delete
-    def delete_favorite(self, request, id):
-        return self.object_delete(request, id, FavoritesRecipe)
+    def delete_favorite(self, request, pk):
+        return self.object_delete(request, pk, FavoritesRecipe)
 
     @action(
         methods=['POST'],
         detail=True,
         permission_classes=[IsAuthenticated]
     )
-    def shopping_cart(self, request, id):
-        return self.object_creation(request, id, ShoppingListSerializer)
+    def shopping_cart(self, request, pk):
+        return self.object_creation(request, pk, ShoppingListSerializer)
 
     @shopping_cart.mapping.delete
-    def delete_shopping_cart(self, request, id):
-        return self.object_delete(request, id, ShoppingList)
+    def delete_shopping_cart(self, request, pk):
+        return self.object_delete(request, pk, ShoppingList)
 
     @action(detail=False)
     def download_shopping_cart(self, request):

@@ -32,7 +32,10 @@ class CustomUserSerializer(UserSerializer):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        return request.user.subscriber.filter(id=obj.id).exists()
+        return Subscription.objects.filter(
+            user=request.user,
+            subscribed_author=obj
+        ).exists()
 
 
 class IngredientSerializer(ModelSerializer):
@@ -100,7 +103,10 @@ class ShoppingListSerializer(ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        return RecipesSubscribedAuthor(instance.recipe).data
+        return RecipesSubscribedAuthor(
+            instance.recipe,
+            context={'request': self.context.get('request')}
+        ).data
 
 
 class RecipesSubscribedAuthor(ModelSerializer):
@@ -118,6 +124,10 @@ class RecipesSubscribedAuthor(ModelSerializer):
 
 class SubscriptionSerializer(ModelSerializer):
     """Сериализатор для подписки/отписки на автора рецептов."""
+    user = PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    subscribed_author = PrimaryKeyRelatedField(
+        queryset=CustomUser.objects.all()
+    )
     email = ReadOnlyField(source='subscribed_author.email')
     id = ReadOnlyField(source='subscribed_author.id')
     username = ReadOnlyField(source='subscribed_author.username')
@@ -138,6 +148,8 @@ class SubscriptionSerializer(ModelSerializer):
             'is_subscribed',
             'recipes',
             'recipes_count',
+            'user',
+            'subscribed_author',
         )
         validators = [
             UniqueTogetherValidator(
@@ -158,8 +170,9 @@ class SubscriptionSerializer(ModelSerializer):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        return request.user.subscriber.filter(
-            subscribed_author=obj
+        return Subscription.objects.filter(
+            user=obj.user,
+            subscribed_author=obj.subscribed_author
         ).exists()
 
     def get_recipes(self, obj):
@@ -244,23 +257,26 @@ class GetRecipeSerializer(ModelSerializer):
 
     def get_ingredients(self, obj):
         return GetPatchIngredientInRecipeSerializer(
-            RecipeIngredient.objects.filter(recipe=obj), many=True
+            RecipeIngredient.objects.filter(recipe=obj),
+            many=True
         ).data
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        return request.user.recipes_favoritesrecipe_related.filter(
-            id=obj.id
+        return FavoritesRecipe.objects.filter(
+            recipe=obj,
+            user=request.user
         ).exists()
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        return request.user.recipes_shoppinglist_related.filter(
-            id=obj.id
+        return ShoppingList.objects.filter(
+            recipe=obj,
+            user=request.user
         ).exists()
 
 

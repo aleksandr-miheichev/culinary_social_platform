@@ -1,4 +1,4 @@
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -164,7 +164,7 @@ class SubscriptionApiView(APIView):
     model = Subscription
 
     def post(self, request, *args, **kwargs):
-        subscribed_author = get_object_or_404(CustomUser, id=kwargs.get('id'))
+        subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('id'))
         try:
             self.model.objects.create(
                 user=request.user,
@@ -184,17 +184,15 @@ class SubscriptionApiView(APIView):
         )
 
     def delete(self, request, *args, **kwargs):
-        subscribed_author = get_object_or_404(CustomUser, id=kwargs.get('id'))
-        if not self.model.objects.filter(
+        subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('id'))
+        try:
+            self.model.objects.get(
                 user=request.user,
                 subscribed_author=subscribed_author
-        ).exists():
+            ).delete()
+        except ObjectDoesNotExist as error:
             return Response(
-                {'errors': 'Подписка не найдена!'},
-                status=HTTP_400_BAD_REQUEST,
+                {'errors': str(error)},
+                status=HTTP_400_BAD_REQUEST
             )
-        self.model.objects.get(
-            user=request.user,
-            subscribed_author=subscribed_author
-        ).delete()
         return Response(status=HTTP_204_NO_CONTENT)

@@ -176,9 +176,9 @@ class SubscriptionApiView(APIView):
         return Response(
             SubscriptionSerializer(
                 Subscription(
-                user=request.user,
-                subscribed_author=subscribed_author
-            ),
+                    user=request.user,
+                    subscribed_author=subscribed_author
+                ),
                 context={'request': request}
             ).data,
             status=HTTP_201_CREATED,

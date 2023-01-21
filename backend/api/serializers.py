@@ -166,13 +166,13 @@ class SubscriptionSerializer(ModelSerializer):
             return False
         return Subscription.objects.filter(
             user=request.user,
-            subscribed_author=obj
+            subscribed_author=obj.subscribed_author
         ).exists()
 
     def get_recipes(self, obj):
         request = self.context.get('request')
         recipes_limit = request.query_params.get('recipes_limit')
-        queryset = obj.recipes.all()
+        queryset = obj.subscribed_author.recipes.all()
         if recipes_limit:
             queryset = queryset[:int(recipes_limit)]
         else:
@@ -184,7 +184,7 @@ class SubscriptionSerializer(ModelSerializer):
         ).data
 
     def get_recipes_count(self, obj):
-        return obj.recipes.count()
+        return obj.subscribed_author.recipes.count()
 
 
 class GetPatchIngredientInRecipeSerializer(ModelSerializer):

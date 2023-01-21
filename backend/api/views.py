@@ -44,9 +44,7 @@ class UserViewSet(UserViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def subscriptions(self, request):
-        queryset = CustomUser.objects.filter(
-            subscribed_author__user=request.user
-        )
+        queryset =  Subscription.objects.filter(user=request.user)
         data = self.paginate_queryset(queryset)
         if data is not None:
             return self.get_paginated_response(

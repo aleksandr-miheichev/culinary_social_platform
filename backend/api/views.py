@@ -60,20 +60,19 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, *args, **kwargs):
         subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('id'))
         if request.method == 'POST':
-            serializer = SubscriptionSerializer(
-                data={
-                    'user': request.user,
-                    'subscribed_author': subscribed_author
-                },
-                context=request
+            Subscription.objects.create(
+                user=request.user,
+                subscribed_author=subscribed_author
             )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(data=serializer.data, status=HTTP_201_CREATED)
-        Subscription.objects.get(
-            user=request.user,
-            subscribed_author=subscribed_author
-        ).delete()
+            return Response(
+                SubscriptionSerializer(
+                    Subscription(
+                        user=request.user,
+                        subscribed_author=subscribed_author
+                    ),
+                    context={'request': request}
+                ).data,
+            )
         return Response(status=HTTP_204_NO_CONTENT)
 
     def reset_password(self, request, *args, **kwargs):

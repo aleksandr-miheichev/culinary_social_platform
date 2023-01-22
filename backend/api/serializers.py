@@ -30,12 +30,10 @@ class CustomUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        return Subscription.objects.filter(
+        return (request.user.is_authenticated and Subscription.objects.filter(
             user=request.user,
             subscribed_author=obj
-        ).exists()
+        ).exists())
 
 
 class IngredientSerializer(ModelSerializer):
@@ -162,12 +160,10 @@ class SubscriptionSerializer(ModelSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        return Subscription.objects.filter(
+        return (request.user.is_authenticated and Subscription.objects.filter(
             user=request.user,
             subscribed_author=obj.subscribed_author
-        ).exists()
+        ).exists())
 
     def get_recipes(self, obj):
         request = self.context.get('request')
@@ -175,8 +171,6 @@ class SubscriptionSerializer(ModelSerializer):
         queryset = obj.subscribed_author.recipes.all()
         if recipes_limit:
             queryset = queryset[:int(recipes_limit)]
-        else:
-            queryset = queryset
         return RecipesSubscribedAuthor(
             queryset,
             many=True,
@@ -257,21 +251,18 @@ class GetRecipeSerializer(ModelSerializer):
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        return FavoritesRecipe.objects.filter(
-            recipe=obj,
-            user=request.user
-        ).exists()
+        return (request.user.is_authenticated
+                and FavoritesRecipe.objects.filter(
+                    recipe=obj,
+                    user=request.user
+                ).exists())
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        return ShoppingList.objects.filter(
+        return (request.user.is_authenticated and ShoppingList.objects.filter(
             recipe=obj,
             user=request.user
-        ).exists()
+        ).exists())
 
 
 class PostPatchDeleteRecipeSerializer(ModelSerializer):

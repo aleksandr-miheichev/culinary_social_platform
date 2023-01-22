@@ -142,6 +142,8 @@ class SubscriptionSerializer(ModelSerializer):
             'is_subscribed',
             'recipes',
             'recipes_count',
+            'user',
+            'subscribed_author',
         )
         validators = [
             UniqueTogetherValidator(

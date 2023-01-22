@@ -64,7 +64,8 @@ class CustomUserViewSet(UserViewSet):
                 data={
                     'user': request.user,
                     'subscribed_author': subscribed_author
-                }
+                },
+                context=request
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()

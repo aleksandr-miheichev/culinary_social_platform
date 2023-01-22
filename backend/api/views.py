@@ -60,20 +60,15 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, *args, **kwargs):
         subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('id'))
         if request.method == 'POST':
-            Subscription.objects.create(
-                user=request.user,
-                subscribed_author=subscribed_author
+            serializer = SubscriptionSerializer(
+                data={
+                    'user': request.user,
+                    'subscribed_author': subscribed_author
+                }
             )
-            return Response(
-                SubscriptionSerializer(
-                    Subscription(
-                        user=request.user,
-                        subscribed_author=subscribed_author
-                    ),
-                    context={'request': request}
-                ).data,
-                status=HTTP_201_CREATED,
-            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(data=serializer.data, status=HTTP_201_CREATED)
         Subscription.objects.get(
             user=request.user,
             subscribed_author=subscribed_author

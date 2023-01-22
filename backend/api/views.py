@@ -73,6 +73,10 @@ class CustomUserViewSet(UserViewSet):
                     context={'request': request}
                 ).data,
             )
+        Subscription.objects.get(
+            user=request.user,
+            subscribed_author=subscribed_author
+        ).delete()
         return Response(status=HTTP_204_NO_CONTENT)
 
     def reset_password(self, request, *args, **kwargs):

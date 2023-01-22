@@ -26,7 +26,7 @@ from users.models import CustomUser
 class CustomUserViewSet(UserViewSet):
 
     pagination_class = NumberRecordsPerPagePagination
-    http_method_names = ('get', 'post', 'head')
+    http_method_names = ('get', 'post', 'head', 'delete',)
 
     def serializer(*args, **kwargs):
         return SubscriptionSerializer(

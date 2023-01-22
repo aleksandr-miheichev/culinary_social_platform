@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -7,9 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import (HTTP_200_OK, HTTP_201_CREATED,
-                                   HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST,
-                                   HTTP_404_NOT_FOUND)
-from rest_framework.views import APIView
+                                   HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND)
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.filters import IngredientFilter, RecipeFilter
@@ -26,7 +23,7 @@ from recipes.models import (FavoritesRecipe, Ingredient, Recipe,
 from users.models import CustomUser
 
 
-class UserViewSet(UserViewSet):
+class CustomUserViewSet(UserViewSet):
 
     pagination_class = NumberRecordsPerPagePagination
     http_method_names = ('get', 'post', 'head')
@@ -54,6 +51,34 @@ class UserViewSet(UserViewSet):
             self.serializer(queryset=queryset, request=request),
             status=HTTP_200_OK,
         )
+
+    @action(
+        methods=('post', 'delete',),
+        detail=True,
+        permission_classes=(IsAuthenticated,),
+    )
+    def subscribe(self, request, *args, **kwargs):
+        subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('id'))
+        if request.method == 'POST':
+            Subscription.objects.create(
+                user=request.user,
+                subscribed_author=subscribed_author
+            )
+            return Response(
+                SubscriptionSerializer(
+                    Subscription(
+                        user=request.user,
+                        subscribed_author=subscribed_author
+                    ),
+                    context={'request': request}
+                ).data,
+                status=HTTP_201_CREATED,
+            )
+        Subscription.objects.get(
+            user=request.user,
+            subscribed_author=subscribed_author
+        ).delete()
+        return Response(status=HTTP_204_NO_CONTENT)
 
     def reset_password(self, request, *args, **kwargs):
         return Response(status=HTTP_404_NOT_FOUND)
@@ -114,12 +139,11 @@ class RecipesViewSet(ModelViewSet):
 
     @staticmethod
     def object_delete(request, pk, model):
-        obj = get_object_or_404(
+        get_object_or_404(
             model,
             user=request.user,
             recipe=get_object_or_404(Recipe, id=pk),
-        )
-        obj.delete()
+        ).delete()
         return Response(status=HTTP_204_NO_CONTENT)
 
     @action(
@@ -155,45 +179,3 @@ class RecipesViewSet(ModelViewSet):
             'ingredient__measurement_unit'
         ).order_by('ingredient__name').annotate(amount=Sum('amount'))
         return pdf_creation(queryset)
-
-
-class SubscriptionApiView(APIView):
-    permission_classes = [IsAuthenticated]
-    model = Subscription
-
-    def post(self, request, *args, **kwargs):
-        subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('id'))
-        try:
-            self.model.objects.create(
-                user=request.user,
-                subscribed_author=subscribed_author
-            )
-        except ValidationError as error:
-            return Response(
-                {'errors': str(error)},
-                status=HTTP_400_BAD_REQUEST
-            )
-        return Response(
-            SubscriptionSerializer(
-                Subscription(
-                    user=request.user,
-                    subscribed_author=subscribed_author
-                ),
-                context={'request': request}
-            ).data,
-            status=HTTP_201_CREATED,
-        )
-
-    def delete(self, request, *args, **kwargs):
-        subscribed_author = get_object_or_404(CustomUser, pk=kwargs.get('id'))
-        try:
-            self.model.objects.get(
-                user=request.user,
-                subscribed_author=subscribed_author
-            ).delete()
-        except ObjectDoesNotExist as error:
-            return Response(
-                {'errors': str(error)},
-                status=HTTP_400_BAD_REQUEST
-            )
-        return Response(status=HTTP_204_NO_CONTENT)

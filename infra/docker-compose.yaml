@@ -3,7 +3,7 @@ version: '3.8'
 services:
 
   db:
-    image: postgres:15.1-alpine
+    image: postgres:16-alpine
     volumes:
       - data_value:/var/lib/postgresql/data/
     env_file:
@@ -28,7 +28,7 @@ services:
       - web
 
   nginx:
-    image: nginx:1.23.3-alpine
+    image: nginx:1.25.2-alpine
     restart: unless-stopped
     volumes:
       - ./data/nginx:/etc/nginx/conf.d

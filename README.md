@@ -1,4 +1,4 @@
-# Продуктовый помощник
+# Кулинарная социальная платформа
 
 ![CI and CD of Foodgram project](https://github.com/aleksandr-miheichev/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
